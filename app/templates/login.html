@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Giriş Yap - PersonaAntalya{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+        <div class="col-xl-10 col-lg-11">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="row g-0">
+
+                    <div class="col-md-5 d-none d-md-flex flex-column justify-content-center align-items-center text-white p-5"
+                         style="background: linear-gradient(135deg, #d35400 0%, #e67e22 100%); position: relative; overflow: hidden;">
+                        <i class="bi bi-person-badge position-absolute" style="font-size: 15rem; opacity: 0.05; right: -20px; bottom: -20px;"></i>
+
+                        <div class="text-center z-index-1">
+                            <h2 class="display-5 fw-bolder mb-3" style="letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                                <span style="color: #f39c12;">Persona</span><span style="color: #ffffff;">Antalya</span>
+                            </h2>
+                            <p class="lead opacity-75 mb-4">Kendi rotanı çizmeye ve Antalya'yı yeniden keşfetmeye kaldığın yerden devam et.</p>
+                            <hr class="w-25 mx-auto border-light opacity-50">
+                        </div>
+                    </div>
+
+                    <div class="col-md-7 p-4 p-md-5 bg-white">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold text-dark">Tekrar Hoş Geldin!</h3>
+                            <p class="text-muted">Hesabına erişmek için bilgilerini gir.</p>
+                        </div>
+
+                        <form method="POST" action="{{ url_for('auth.login') }}">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control bg-light border-0" id="email" name="email" placeholder="name@example.com" required>
+                                <label for="email" class="text-muted"><i class="bi bi-envelope me-2"></i>E-posta Adresi</label>
+                            </div>
+
+                            <div class="form-floating mb-2 position-relative">
+                                <input type="password" class="form-control bg-light border-0 pe-5" id="password" name="password" placeholder="Şifre" required>
+                                <label for="password" class="text-muted"><i class="bi bi-lock me-2"></i>Şifre</label>
+                                <span class="position-absolute top-50 end-0 translate-middle-y me-3 cursor-pointer text-muted" onclick="togglePassword()">
+                                    <i class="bi bi-eye-slash" id="eye-icon"></i>
+                                </span>
+                            </div>
+
+                            <div class="text-end mb-4">
+                                <a href="{{ url_for('auth.forgot_password') }}" class="text-decoration-none small fw-bold" style="color: #d35400;">Şifremi Unuttum</a>
+                            </div>
+
+                            <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold text-white shadow-sm mb-3"
+                                    style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border: none;">
+                                Giriş Yap <i class="bi bi-box-arrow-in-right ms-2"></i>
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="text-muted mb-0">Henüz hesabın yok mu?
+                                <a href="{{ url_for('auth.register') }}" class="text-decoration-none fw-bold" style="color: #d35400;">Kayıt Ol</a>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const icon = document.getElementById('eye-icon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("bi-eye-slash", "bi-eye");
+        } else {
+            input.type = "password";
+            icon.classList.replace("bi-eye", "bi-eye-slash");
+        }
+    }
+</script>
+
+<style>
+    .form-floating > .form-control:focus {
+        border-color: #e67e22 !important;
+        box-shadow: 0 0 0 0.25rem rgba(230, 126, 34, 0.2) !important;
+    }
+    .cursor-pointer { cursor: pointer; }
+    .z-index-1 { z-index: 1; }
+</style>
+{% endblock %}

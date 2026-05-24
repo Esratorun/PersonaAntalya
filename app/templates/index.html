@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Ana Sayfa - PersonaAntalya{% endblock %}
+
+{% block content %}
+<div class="hero-section position-relative d-flex align-items-center justify-content-center"
+     style="min-height: 85vh; background: url('https://cdn2.enuygun.com/media/lib/1200x675/uploads/image/apollo-60612.webp') center/cover no-repeat; margin-top: -1.5rem;">
+
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity: 0.65;"></div>
+
+    <div class="container position-relative z-index-1 text-center text-white px-4">
+        <span class="badge bg-warning text-dark mb-3 px-3 py-2 rounded-pill fw-bold shadow-sm" style="letter-spacing: 1px;">YAPAY ZEKA DESTEKLİ REHBER</span>
+
+        <h1 class="display-2 fw-bolder mb-3" style="letter-spacing: -2px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+            <span style="color: #f39c12;">Persona</span><span style="color: #ffffff;">Antalya</span>
+        </h1>
+
+        <p class="lead mb-5 fw-light mx-auto" style="max-width: 700px; font-size: 1.3rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+            Tarihçi, Influencer, Efsane Avcısı, Masalcı veya Gurme... Karakterini seç, Antalya'nın gizli kalmış hazinelerini tamamen sana özel bir rotayla keşfetmeye başla.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.explore') }}" class="btn btn-warning btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg hero-btn" style="background: #f39c12; border: none;">
+                    Keşfetmeye Devam Et <i class="bi bi-map-fill ms-2"></i>
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-warning btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg hero-btn" style="background: #f39c12; border: none;">
+                    Giriş Yap <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg hero-btn-outline">
+                    Ücretsiz Kayıt Ol
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="position-absolute bottom-0 start-50 translate-middle-x mb-4 bounce-anim">
+        <a href="#detayli-ozellikler" class="text-white opacity-75"><i class="bi bi-chevron-down fs-2"></i></a>
+    </div>
+</div>
+
+<div id="detayli-ozellikler" class="container py-5 my-5">
+
+    <div class="row align-items-center mb-5 pb-5 border-bottom">
+        <div class="col-lg-6 mb-4 mb-lg-0 pe-lg-5">
+            <h6 class="text-warning fw-bold text-uppercase tracking-wider mb-2">Karakterini Seç</h6>
+            <h2 class="fw-bold display-6 text-dark mb-4">5 Farklı Persona</h2>
+            <p class="text-muted lead mb-4">Herkesin gördüğünü değil, kendi ruhuna hitap edeni gör. Uygulamaya kayıt olurken tarzını seç, tüm sistem senin zevkine göre şekillensin:</p>
+
+            <ul class="list-unstyled">
+                <li class="d-flex align-items-start mb-3">
+                    <i class="bi bi-camera-fill text-primary fs-4 me-3 mt-1"></i>
+                    <div><strong class="text-dark">Influencer:</strong> Nokta atışı fotoğraf açıları ve en iyi ışık saatleri.</div>
+                </li>
+                <li class="d-flex align-items-start mb-3">
+                    <i class="bi bi-bank text-secondary fs-4 me-3 mt-1"></i>
+                    <div><strong class="text-dark">Tarihçi:</strong> Yüzlerce yıllık mimari sırlar ve tarihi olaylar.</div>
+                </li>
+                <li class="d-flex align-items-start mb-3">
+                    <i class="bi bi-compass-fill text-success fs-4 me-3 mt-1"></i>
+                    <div><strong class="text-dark">Efsane Avcısı:</strong> Gizemli yerler, gizli hazineler ve yöresel şehir efsaneleri.</div>
+                </li>
+                <li class="d-flex align-items-start mb-3">
+                    <i class="bi bi-book-half text-info fs-4 me-3 mt-1"></i>
+                    <div><strong class="text-dark">Masalcı:</strong> Şiirsel betimlemeler ve büyülü, duygusal hikayeler.</div>
+                </li>
+                <li class="d-flex align-items-start">
+                    <i class="bi bi-cup-hot-fill text-danger fs-4 me-3 mt-1"></i>
+                    <div><strong class="text-dark">Gurme:</strong> Mekanların kokusu, dokusu ve en iyi lezzet durakları.</div>
+                </li>
+            </ul>
+        </div>
+        <div class="col-lg-6 text-center">
+            <div class="p-5 bg-light rounded-4 shadow-sm feature-img-box">
+                <i class="bi bi-person-lines-fill text-warning" style="font-size: 8rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row align-items-center mb-5 pb-5 border-bottom">
+        <div class="col-lg-6 order-lg-2 mb-4 mb-lg-0 ps-lg-5">
+            <h6 class="text-warning fw-bold text-uppercase tracking-wider mb-2">Gerçek Zamanlı AI</h6>
+            <h2 class="fw-bold display-6 text-dark mb-4">Canlı Bağlama Duyarlı Rehber</h2>
+            <p class="text-muted lead mb-4">Standart Wikipedia kopyası metinleri unutun. PersonaAntalya, Google Gemini altyapısını kullanarak senin için saniyeler içinde benzersiz bir hikaye yazar.</p>
+            <p class="text-muted mb-0"><i class="bi bi-check2-circle text-success me-2"></i><strong>Hava Durumu Algısı:</strong> Antalya'nın o anki havasını (sıcak, yağmurlu vs.) hikayeye dahil eder.</p>
+            <p class="text-muted mb-0 mt-2"><i class="bi bi-check2-circle text-success me-2"></i><strong>Zaman Algısı:</strong> Akşam saatlerinde gidiyorsan gün batımı veya gece önerileri yapar.</p>
+        </div>
+        <div class="col-lg-6 order-lg-1 text-center">
+            <div class="p-5 bg-light rounded-4 shadow-sm feature-img-box">
+                <i class="bi bi-robot text-primary" style="font-size: 8rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6 mb-4 mb-lg-0 pe-lg-5">
+            <h6 class="text-warning fw-bold text-uppercase tracking-wider mb-2">Dinamik Algoritmalar</h6>
+            <h2 class="fw-bold display-6 text-dark mb-4">Senin İçin Planlanan Rotalar</h2>
+            <p class="text-muted lead mb-4">Kaybolmak yok! Seçtiğin yerleri anlık GPS konumuna göre "Yakından Uzağa" otomatik olarak sırala ve harita üzerinde çiz.</p>
+
+            <ul class="list-unstyled">
+                <li class="d-flex align-items-start mb-3">
+                    <i class="bi bi-geo-alt-fill text-primary fs-4 me-3 mt-1"></i>
+                    <div>
+                        <strong class="text-dark">Zaman Algılı Rota:</strong>
+                        Sistem arka planda saatleri kontrol eder ve sadece o an <b>açık olan</b> restoranları haritana dahil eder.
+                    </div>
+                </li>
+                <li class="d-flex align-items-start">
+                    <i class="bi bi-heart-fill text-danger fs-4 me-3 mt-1"></i>
+                    <div>
+                        <strong class="text-dark">4 Farklı Beslenme Tercihi:</strong><br>
+                        <span class="badge bg-secondary mt-1 me-1">Standart</span>
+                        <span class="badge bg-success mt-1 me-1">Vegan</span>
+                        <span class="badge bg-info mt-1 me-1">Vejetaryen</span>
+                        <span class="badge bg-warning text-dark mt-1">Glutensiz</span><br>
+                        <span class="text-muted small">Algoritma, bu diyet türlerine tam uyan mekanları saniyeler içinde önceliklendirir.</span>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+        <div class="col-lg-6 text-center">
+            <div class="p-5 bg-light rounded-4 shadow-sm feature-img-box">
+                <i class="bi bi-map-fill text-success" style="font-size: 8rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid bg-dark text-white py-5">
+    <div class="container text-center py-4">
+        {% if current_user.is_authenticated %}
+            <h2 class="fw-bold mb-3">Maceraya Kaldığın Yerden Devam Et</h2>
+            <p class="lead opacity-75 mb-4 mx-auto" style="max-width: 600px;">Haritanı aç, sana özel rotanı oluştur ve Antalya'nın tadını çıkar.</p>
+            <a href="{{ url_for('main.explore') }}" class="btn btn-warning btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg hero-btn" style="background: #f39c12; border: none;">
+                Rotanı Oluştur <i class="bi bi-map ms-2"></i>
+            </a>
+        {% else %}
+            <h2 class="fw-bold mb-3">Kendi Antalya Hikayeni Yazmaya Başla</h2>
+            <p class="lead opacity-75 mb-4 mx-auto" style="max-width: 600px;">Uygulamaya ücretsiz kayıt ol, personanı seç ve Akdeniz'in incisini daha önce hiç yaşamadığın bir deneyimle gez.</p>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg hero-btn" style="background: #f39c12; border: none;">
+                Hemen Ücretsiz Katıl <i class="bi bi-rocket-takeoff ms-2"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Hero Buton Efektleri */
+    .hero-btn:hover {
+        background: #e67e22 !important;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(243, 156, 18, 0.4) !important;
+        transition: all 0.3s ease;
+    }
+    .hero-btn-outline:hover {
+        background: white;
+        color: #d35400 !important;
+        transform: translateY(-3px);
+        transition: all 0.3s ease;
+    }
+
+    /* Görsel Kutusu Efektleri */
+    .feature-img-box {
+        transition: all 0.5s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .feature-img-box:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08) !important;
+    }
+
+    /* Zıplayan Ok Animasyonu */
+    .bounce-anim {
+        animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-20px); }
+        60% { transform: translateY(-10px); }
+    }
+
+    .tracking-wider {
+        letter-spacing: 2px;
+    }
+</style>
+{% endblock %}

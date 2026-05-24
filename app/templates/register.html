@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıt Ol - PersonaAntalya{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+        <div class="col-xl-10 col-lg-11">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="row g-0">
+
+                    <div class="col-md-5 d-none d-md-flex flex-column justify-content-center align-items-center text-white p-5"
+                         style="background: linear-gradient(135deg, #d35400 0%, #e67e22 100%); position: relative; overflow: hidden;">
+                        <i class="bi bi-compass position-absolute" style="font-size: 15rem; opacity: 0.05; right: -20px; bottom: -20px;"></i>
+                        <i class="bi bi-map position-absolute" style="font-size: 10rem; opacity: 0.05; left: -20px; top: -20px;"></i>
+
+                        <div class="text-center z-index-1">
+                            <h2 class="display-5 fw-bolder mb-3" style="letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                                <span style="color: #f39c12;">Persona</span><span style="color: #ffffff;">Antalya</span>
+                            </h2>
+
+                            <p class="lead opacity-75 mb-4" style="font-size: 1.1rem;">Antalya'nın gizli kalmış güzelliklerini kendi tarzınla keşfetmeye hazır mısın?</p>
+                            <hr class="w-25 mx-auto border-light opacity-50">
+                            <p class="small mt-3 opacity-75">Hemen aramıza katıl ve sana özel rotanı oluştur.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7 p-4 p-md-5 bg-white">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold text-dark">Hesap Oluştur</h3>
+                            <p class="text-muted">Saniyeler içinde ücretsiz hesabını aç.</p>
+                        </div>
+
+                        <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm">
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control bg-light border-0" id="username" name="username" placeholder="Ad Soyad" required>
+                                <label for="username" class="text-muted"><i class="bi bi-person me-2"></i>Ad Soyad</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control bg-light border-0" id="email" name="email" placeholder="name@example.com" required>
+                                <label for="email" class="text-muted"><i class="bi bi-envelope me-2"></i>E-posta Adresi</label>
+                            </div>
+
+                            <div class="form-floating mb-3 position-relative">
+                                <input type="password" class="form-control bg-light border-0 pe-5" id="password" name="password" placeholder="Şifre" required>
+                                <label for="password" class="text-muted"><i class="bi bi-lock me-2"></i>Şifre</label>
+                                <span class="position-absolute top-50 end-0 translate-middle-y me-3 cursor-pointer text-muted" onclick="togglePassword('password', 'eye-icon-1')">
+                                    <i class="bi bi-eye-slash" id="eye-icon-1"></i>
+                                </span>
+                            </div>
+
+                            <div class="form-floating mb-4 position-relative">
+                                <input type="password" class="form-control bg-light border-0 pe-5" id="confirm_password" placeholder="Şifre Tekrar" required>
+                                <label for="confirm_password" class="text-muted"><i class="bi bi-check2-circle me-2"></i>Şifre (Tekrar)</label>
+                                <span class="position-absolute top-50 end-0 translate-middle-y me-3 cursor-pointer text-muted" onclick="togglePassword('confirm_password', 'eye-icon-2')">
+                                    <i class="bi bi-eye-slash" id="eye-icon-2"></i>
+                                </span>
+                                <div id="passwordFeedback" class="invalid-feedback fw-bold mt-2" style="display: none;"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold text-white shadow-sm mb-3" id="submitBtn" disabled
+                                    style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border: none;">
+                                Kayıt Ol <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="text-muted mb-0">Zaten üye misin?
+                                <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-bold" style="color: #d35400;">Giriş Yap</a>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-floating > .form-control:focus {
+        border-color: #e67e22 !important;
+        box-shadow: 0 0 0 0.25rem rgba(230, 126, 34, 0.25) !important;
+        background-color: #fff !important;
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .z-index-1 {
+        z-index: 1;
+    }
+</style>
+
+<script>
+    // 1. Şifre Görünürlüğünü Aç/Kapat (Göz İkonu)
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        } else {
+            input.type = "password";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        }
+    }
+
+    // 2. Şifre Uyuşmazlığı ve Güvenlik Kontrolü
+    document.addEventListener("DOMContentLoaded", function() {
+        const pass = document.getElementById('password');
+        const confirmPass = document.getElementById('confirm_password');
+        const submitBtn = document.getElementById('submitBtn');
+        const feedback = document.getElementById('passwordFeedback');
+
+        function checkPasswords() {
+            if(confirmPass.value === '') {
+                feedback.style.display = 'none';
+                submitBtn.disabled = true;
+                confirmPass.classList.remove('is-invalid', 'is-valid');
+                return;
+            }
+
+            if(pass.value === confirmPass.value) {
+                feedback.textContent = 'Şifreler eşleşiyor ✓';
+                feedback.className = 'valid-feedback d-block text-success';
+                confirmPass.classList.remove('is-invalid');
+                confirmPass.classList.add('is-valid', 'border', 'border-success');
+                submitBtn.disabled = false;
+            } else {
+                feedback.textContent = 'Şifreler birbiriyle uyuşmuyor!';
+                feedback.className = 'invalid-feedback d-block text-danger';
+                confirmPass.classList.remove('is-valid', 'border-success');
+                confirmPass.classList.add('is-invalid', 'border', 'border-danger');
+                submitBtn.disabled = true;
+            }
+        }
+
+        pass.addEventListener('input', checkPasswords);
+        confirmPass.addEventListener('input', checkPasswords);
+    });
+</script>
+{% endblock %}

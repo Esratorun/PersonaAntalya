@@ -1,0 +1,433 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.name }} - PersonaAntalya{% endblock %}
+
+{% block content %}
+<div class="place-detail-page">
+    <div class="place-hero" style="height: 350px; background: url('{{ item.image_url }}') center/cover no-repeat; position: relative; overflow: hidden; margin-top:-1.5rem;">
+        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity: 0.5;"></div>
+        <div class="position-absolute bottom-0 start-0 w-100" style="height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);"></div>
+
+        <div class="position-absolute top-0 start-0 p-3 z-index-1">
+            <a href="/kesfet" class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 35px; height: 35px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div>
+        <div class="position-absolute top-0 end-0 p-3 z-index-1">
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm fav-btn d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" data-id="{{ item.id }}" data-type="{{ 'restaurant' if is_food else 'place' }}">
+                <i class="bi {% if is_favorite %}bi-heart-fill text-danger{% else %}bi-heart text-dark{% endif %}"></i>
+            </button>
+        </div>
+
+        <div class="position-absolute bottom-0 start-0 p-4 w-100 z-index-1 text-white">
+            <div class="container">
+                <div class="mb-2 d-flex gap-2 flex-wrap">
+                    {% if is_food %}
+                        <span class="badge bg-warning text-dark shadow-sm"><i class="bi bi-egg-fried"></i> {{ item.diet_category | upper | default('STANDART', true) }}</span>
+                        <span class="badge bg-success shadow-sm"><i class="bi bi-cash"></i> {{ item.price_level | default('₺₺', true) }}</span>
+                    {% else %}
+                        <span class="badge bg-info text-dark shadow-sm"><i class="bi bi-geo-fill"></i> {{ item.category | upper | default('MEKAN', true) }}</span>
+                    {% endif %}
+                </div>
+                <h1 class="display-5 fw-bold mb-1" id="placeName">{{ item.name }}</h1>
+                <div class="d-flex gap-3 flex-wrap opacity-75">
+                    <span><i class="bi bi-star-fill text-warning"></i> <span id="placeRating">{{ item.rating | default('4.5', true) }}</span></span>
+                    <span id="placeDistrict"><i class="bi bi-geo-alt-fill text-danger"></i> {{ item.district }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="persona-content-section mb-5 p-4 bg-light rounded-4 shadow-sm" style="border-left: 5px solid #f39c12;">
+            <div class="d-flex align-items-center mb-3">
+                <div id="personaEmoji" style="font-size: 2.5rem; margin-right: 1rem;"><i class="bi bi-robot text-primary"></i></div>
+                <div>
+                    <h5 class="fw-bold mb-0" id="personaName">{{ current_user.selected_persona | title }} Gözünden...</h5>
+                    <small class="text-muted">Gemini AI tarafından senin için hazırlandı</small>
+                </div>
+                <button id="readAloudBtn" class="btn btn-outline-primary btn-sm ms-auto rounded-pill px-3 shadow-sm d-none d-md-block">
+                    <i class="bi bi-play-circle-fill me-1"></i> <span id="readBtnText">Dinle</span>
+                </button>
+            </div>
+            <p id="personaStory" class="mb-0 lead fst-italic" style="color: #4a4a4a;">Yapay zeka bu mekanın efsanesini senin tarzına göre yazıyor, lütfen bekle... <span class="spinner-grow spinner-grow-sm text-primary" role="status"></span></p>
+        </div>
+
+        <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold text-dark" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                    <i class="bi bi-info-circle text-primary"></i> Genel Bilgiler
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content mb-5">
+            <div class="tab-pane fade show active" id="info" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-2">Çalışma Saatleri</h6>
+                        <p id="placeHours" class="mb-3 text-muted"><i class="bi bi-clock"></i> {{ item.opening_time | default('09:00', true) }} - {{ item.closing_time | default('23:00', true) }}</p>
+
+                        <h6 class="fw-bold mb-2">Giriş / Fiyat</h6>
+                        <p id="placeFee" class="mb-3 text-muted">
+                            {% if is_food %}{{ item.price_level | default('₺₺ - Ortalama', true) }}{% else %}Ücretsiz / Müzekart Geçerli{% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="https://www.google.com/maps?q={{ item.latitude }},{{ item.longitude }}" target="_blank" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
+                            <i class="bi bi-cursor-fill me-1"></i> Haritada Git
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5 border-top pt-5">
+            <div class="col-md-12">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 50px; height: 50px;">
+                        <i class="bi bi-robot fs-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ current_user.selected_persona | title }} ile Sohbet Et</h4>
+                        <p class="text-muted small mb-0">{{ item.name }} hakkında dilediğin soruyu sorabilirsin!</p>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5" style="background-color: #f1f3f5;">
+                    <div id="chatHistoryBox" class="p-4" style="height: 350px; overflow-y: auto;">
+                        <div class="d-flex mb-4">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 shadow-sm" style="width: 45px; height: 45px;">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <div class="bg-white p-3 rounded-4 shadow-sm" style="max-width: 80%; border-top-left-radius: 0 !important;">
+                                <p class="mb-0 text-dark" style="font-size: 0.95rem;">Merhaba dostum! Ben senin {{ current_user.selected_persona | title }} rehberinim. Şu an <strong>{{ item.name }}</strong> mekanındayız. Burayla ilgili ne merak ediyorsun?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-white p-3 border-0">
+                        <div class="input-group">
+                            <input type="text" id="chatInput" class="form-control form-control-lg bg-light border-0 shadow-none rounded-start-pill ps-4" placeholder="Seni dinliyorum..." autocomplete="off">
+                            <button class="btn btn-primary px-4 fw-bold rounded-end-pill shadow-sm" id="sendChatBtn">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5 border-top pt-5">
+            <div class="col-md-12">
+                <h4 class="fw-bold mb-4"><i class="bi bi-chat-left-text text-primary me-2"></i> Kullanıcı Yorumları</h4>
+
+                <div class="card border-0 shadow-sm rounded-4 mb-5" style="background-color: #f8f9fa;">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">Sen ne düşünüyorsun?</h6>
+
+                        <div class="mb-3">
+                            <span class="text-muted me-2">Puanın:</span>
+                            <div class="d-inline-flex" id="starRating">
+                                <i class="bi bi-star fs-4 cursor-pointer text-warning" data-rating="1"></i>
+                                <i class="bi bi-star fs-4 cursor-pointer text-warning" data-rating="2"></i>
+                                <i class="bi bi-star fs-4 cursor-pointer text-warning" data-rating="3"></i>
+                                <i class="bi bi-star fs-4 cursor-pointer text-warning" data-rating="4"></i>
+                                <i class="bi bi-star fs-4 cursor-pointer text-warning" data-rating="5"></i>
+                            </div>
+                            <input type="hidden" id="selectedRating" value="0">
+                        </div>
+
+                        <textarea class="form-control rounded-3 border-0 shadow-sm mb-3" id="reviewComment" rows="3" placeholder="Bu mekan hakkında deneyimlerini paylaş..."></textarea>
+
+                        <div class="text-end">
+                            <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" id="submitReviewBtn">
+                                <i class="bi bi-send-fill"></i> Gönder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="reviewsList" class="d-flex flex-column gap-3">
+                    <div class="text-center text-muted spinner-border text-primary mx-auto" role="status" id="reviewLoader"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const currentItemId = "{{ item.id }}";
+    const currentItemType = "{{ 'restaurant' if is_food else 'place' }}";
+
+    let synth = window.speechSynthesis;
+    let isSpeaking = false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // 1. YAPAY ZEKA HİKAYESİNİ ÇEK
+        fetch(`/api/${currentItemType}s/${currentItemId}`)
+            .then(response => response.json())
+            .then(data => {
+                if(data.success && data.persona_content) {
+                    document.getElementById('personaStory').textContent = data.persona_content.story;
+                } else {
+                    document.getElementById('personaStory').textContent = "{{ item.description | default('Bu mekan için henüz özel bir hikaye oluşturulmadı.', true) }}";
+                }
+            })
+            .catch(error => {
+                document.getElementById('personaStory').textContent = "{{ item.description | default('Hikaye yüklenemedi.', true) }}";
+            });
+
+        // 2. SESLİ OKUMA (TEXT-TO-SPEECH)
+        const readBtn = document.getElementById('readAloudBtn');
+        const readBtnText = document.getElementById('readBtnText');
+        const readBtnIcon = readBtn.querySelector('i');
+
+        readBtn.addEventListener('click', function() {
+            const storyText = document.getElementById('personaStory').textContent;
+
+            if (synth.speaking) {
+                synth.cancel();
+                isSpeaking = false;
+                readBtnIcon.className = 'bi bi-play-circle-fill me-1';
+                readBtnText.textContent = 'Dinle';
+                return;
+            }
+
+            if (!storyText.includes("bekle...") && storyText.trim() !== "") {
+                const utterance = new SpeechSynthesisUtterance(storyText);
+                utterance.lang = 'tr-TR';
+
+                utterance.onend = function() {
+                    isSpeaking = false;
+                    readBtnIcon.className = 'bi bi-play-circle-fill me-1';
+                    readBtnText.textContent = 'Dinle';
+                };
+
+                synth.speak(utterance);
+                isSpeaking = true;
+                readBtnIcon.className = 'bi bi-stop-circle-fill me-1';
+                readBtnText.textContent = 'Durdur';
+            }
+        });
+
+        window.addEventListener('beforeunload', function() { if (synth.speaking) synth.cancel(); });
+
+        // 3. FAVORİ BUTONU MANTIĞI
+        document.querySelector('.fav-btn').addEventListener('click', function(e) {
+            const btn = this;
+            const icon = btn.querySelector('i');
+
+            icon.style.transform = "scale(1.3)";
+            setTimeout(() => icon.style.transform = "scale(1)", 200);
+
+            fetch('/api/favorites/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: currentItemType, id: currentItemId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    if(data.status === 'added') {
+                        icon.classList.remove('bi-heart', 'text-dark');
+                        icon.classList.add('bi-heart-fill', 'text-danger');
+                    } else {
+                        icon.classList.remove('bi-heart-fill', 'text-danger');
+                        icon.classList.add('bi-heart', 'text-dark');
+                    }
+                }
+            });
+        });
+
+        // =========================================================
+        // 4. YENİ: SOHBET (CHAT) MANTIĞI
+        // =========================================================
+        const chatInput = document.getElementById('chatInput');
+        const sendChatBtn = document.getElementById('sendChatBtn');
+        const chatHistoryBox = document.getElementById('chatHistoryBox');
+
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        sendChatBtn.addEventListener('click', sendChatMessage);
+
+        function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Kullanıcının mesajını sağa ekle
+            chatHistoryBox.innerHTML += `
+                <div class="d-flex mb-4 justify-content-end">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-4 shadow-sm border border-primary border-opacity-25" style="max-width: 80%; border-top-right-radius: 0 !important;">
+                        <p class="mb-0 text-dark" style="font-size: 0.95rem;">${message}</p>
+                    </div>
+                    <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center ms-3 flex-shrink-0 shadow-sm" style="width: 45px; height: 45px;">
+                        <i class="bi bi-person"></i>
+                    </div>
+                </div>
+            `;
+
+            chatInput.value = '';
+            chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
+
+            // Yazıyor animasyonunu ekle
+            const loaderId = 'chat_loader_' + Date.now();
+            chatHistoryBox.innerHTML += `
+                <div class="d-flex mb-4" id="${loaderId}">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 shadow-sm" style="width: 45px; height: 45px;">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-4 shadow-sm d-flex align-items-center" style="max-width: 80%; border-top-left-radius: 0 !important;">
+                        <div class="spinner-grow spinner-grow-sm text-primary me-1" role="status" style="width: 0.5rem; height: 0.5rem;"></div>
+                        <div class="spinner-grow spinner-grow-sm text-primary me-1" role="status" style="width: 0.5rem; height: 0.5rem; animation-delay: 0.2s;"></div>
+                        <div class="spinner-grow spinner-grow-sm text-primary" role="status" style="width: 0.5rem; height: 0.5rem; animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+            `;
+            chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
+
+            // API'ye İstek At
+            fetch(`/api/chat/${currentItemType}s/${currentItemId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById(loaderId).remove();
+
+                if(data.success) {
+                    chatHistoryBox.innerHTML += `
+                        <div class="d-flex mb-4">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 shadow-sm" style="width: 45px; height: 45px;">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <div class="bg-white p-3 rounded-4 shadow-sm" style="max-width: 80%; border-top-left-radius: 0 !important;">
+                                <p class="mb-0 text-dark" style="font-size: 0.95rem; white-space: pre-wrap;">${data.reply}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    chatHistoryBox.innerHTML += `<div class="text-danger small text-center mb-3">Bağlantı hatası: ${data.reply}</div>`;
+                }
+                chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
+            })
+            .catch(err => {
+                document.getElementById(loaderId).remove();
+                chatHistoryBox.innerHTML += `<div class="text-danger small text-center mb-3">Sunucuya ulaşılamadı.</div>`;
+                chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
+            });
+        }
+
+        // 5. PUANLAMA VE YORUM SİSTEMİ
+        loadReviews();
+
+        const stars = document.querySelectorAll('#starRating i');
+        const ratingInput = document.getElementById('selectedRating');
+
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                let rating = this.getAttribute('data-rating');
+                ratingInput.value = rating;
+
+                stars.forEach(s => {
+                    if (s.getAttribute('data-rating') <= rating) {
+                        s.classList.remove('bi-star');
+                        s.classList.add('bi-star-fill');
+                    } else {
+                        s.classList.remove('bi-star-fill');
+                        s.classList.add('bi-star');
+                    }
+                });
+            });
+        });
+
+        document.getElementById('submitReviewBtn').addEventListener('click', function() {
+            const rating = ratingInput.value;
+            const comment = document.getElementById('reviewComment').value;
+            const btn = this;
+
+            if (rating === "0") {
+                alert("Lütfen önce yıldız vererek bir puan seçin!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>...';
+
+            fetch('/api/reviews/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: currentItemType,
+                    id: currentItemId,
+                    rating: rating,
+                    comment: comment
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send-fill"></i> Gönder';
+
+                if(data.success) {
+                    document.getElementById('reviewComment').value = "";
+                    ratingInput.value = "0";
+                    stars.forEach(s => { s.classList.remove('bi-star-fill'); s.classList.add('bi-star'); });
+                    loadReviews();
+                } else {
+                    alert("Hata: " + data.error);
+                }
+            });
+        });
+    });
+
+    function loadReviews() {
+        fetch(`/api/reviews/get/${currentItemType}/${currentItemId}`)
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('reviewsList');
+                list.innerHTML = '';
+
+                if (data.success) {
+                    if (data.data.length === 0) {
+                        list.innerHTML = '<div class="text-center text-muted fst-italic p-4 bg-light rounded-4">Henüz yorum yapılmamış. İlk yorumu sen yap!</div>';
+                        return;
+                    }
+
+                    data.data.forEach(rev => {
+                        let starsHtml = '';
+                        for(let i=1; i<=5; i++) {
+                            if(i <= rev.rating) starsHtml += '<i class="bi bi-star-fill text-warning"></i>';
+                            else starsHtml += '<i class="bi bi-star text-warning"></i>';
+                        }
+
+                        list.innerHTML += `
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="fw-bold mb-0"><i class="bi bi-person-circle text-secondary me-2"></i>${rev.user_name}</h6>
+                                        <small class="text-muted">${rev.date}</small>
+                                    </div>
+                                    <div class="mb-3">${starsHtml}</div>
+                                    <p class="card-text text-secondary mb-0" style="white-space: pre-wrap;">${rev.comment}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    list.innerHTML = '<div class="text-center text-danger">Yorumlar yüklenemedi.</div>';
+                }
+            });
+    }
+</script>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .z-index-1 { z-index: 1; }
+</style>
+{% endblock %}

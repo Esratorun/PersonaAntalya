@@ -1,0 +1,71 @@
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm py-3" style="background-color: rgba(33, 37, 41, 0.85); backdrop-filter: blur(10px);">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-4" href="{{ url_for('main.index') }}" style="letter-spacing: -1px;">
+            <span style="color: #f39c12;">Persona</span><span style="color: #ffffff;">Antalya</span>
+        </a>
+
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+            {% if current_user.is_authenticated %}
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item d-flex align-items-center">
+                        <span class="text-light opacity-75" style="font-size: 0.95rem;">
+                            Merhaba, <strong class="text-white">{{ current_user.username }}</strong> 👋
+                        </span>
+                    </li>
+                </ul>
+            {% else %}
+                <ul class="navbar-nav me-auto"></ul>
+            {% endif %}
+
+            <ul class="navbar-nav ms-auto align-items-center gap-3">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white fw-bold hover-scale" href="{{ url_for('main.explore') }}">
+                            <i class="bi bi-map-fill text-warning me-1"></i> Keşfet
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light opacity-75 hover-scale" href="{{ url_for('main.persona_select') }}">
+                            <i class="bi bi-person-lines-fill me-1"></i> Tercihlerim
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm hover-scale" href="{{ url_for('main.profile') }}" style="background: #f39c12; border: none; color: white;">
+                            <i class="bi bi-person-circle me-1"></i> Profilim
+                        </a>
+                    </li>
+
+                    <!-- DÜZELTİLMİŞ, BELİRGİN ÇIKIŞ BUTONU -->
+                    <li class="nav-item border-start border-secondary ps-3 ms-1 d-flex align-items-center">
+                        <a class="btn btn-danger text-white rounded-circle p-2 d-flex align-items-center justify-content-center hover-scale shadow-sm"
+                           href="{{ url_for('auth.logout') }}"
+                           title="Güvenli Çıkış Yap"
+                           style="width: 40px; height: 40px;">
+                            <i class="bi bi-power fs-5"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white fw-bold px-3 hover-scale" href="{{ url_for('auth.login') }}">Giriş Yap</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-warning fw-bold rounded-pill shadow-sm px-4 hover-scale" href="{{ url_for('auth.register') }}" style="background: #f39c12; border: none; color: white;">
+                            Kayıt Ol
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<style>
+    /* Navbar için ufak hover animasyonları */
+    .hover-scale { transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease; }
+    .hover-scale:hover { transform: translateY(-2px); opacity: 1 !important; }
+</style>

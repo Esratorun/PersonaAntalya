@@ -1,0 +1,764 @@
+{% extends "base.html" %}
+
+{% block title %}Keşfet - PersonaAntalya{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% set persona_data = {
+    'Tarihçi': {
+        'img': url_for('static', filename='images/tarihci.jpg'),
+        'title': 'Tarihin İzinde Bir Yolculuk',
+        'desc': 'Antik çağların, yıkılmayan sütunların ve bin yıllık hikayelerin peşine düş.',
+        'icon': 'bi-bank', 'color': '#8e44ad'
+    },
+    'Influencer': {
+        'img': url_for('static', filename='images/influencer.jpg'),
+        'title': 'En Trend Mekanlar ve Kareler',
+        'desc': 'Antalya\'nın en estetik köşelerinde mükemmel açıyı ve ışığı yakala.',
+        'icon': 'bi-camera-fill', 'color': '#e1306c'
+    },
+    'Masalcı': {
+        'img': url_for('static', filename='images/masalci.jpg'),
+        'title': 'Büyülü ve Şiirsel Rotalar',
+        'desc': 'Şehrin gürültüsünden uzak, masalsı ve huzur dolu bir atmosfere adım at.',
+        'icon': 'bi-book-half', 'color': '#9b59b6'
+    },
+    'Gurme': {
+        'img': url_for('static', filename='images/gurme.jpg'),
+        'title': 'Eşsiz Lezzet Durakları',
+        'desc': 'Akdeniz mutfağının en özel tatlarını ve gizli kalmış restoranlarını keşfet.',
+        'icon': 'bi-cup-hot-fill', 'color': '#d35400'
+    },
+    'Efsane Avcısı': {
+        'img': url_for('static', filename='images/efsane.jpg'),
+        'title': 'Gizemli Sırların Peşinde',
+        'desc': 'Karanlık mağaralar, şehir efsaneleri ve çözülmemiş Antalya gizemleri.',
+        'icon': 'bi-compass-fill', 'color': '#16a085'
+    }
+} %}
+
+{% set p_info = persona_data.get(current_user.selected_persona, persona_data['Tarihçi']) %}
+
+<div class="position-relative d-flex align-items-center justify-content-center"
+     style="height: 35vh; min-height: 280px; background: url('{{ p_info.img }}') center/cover no-repeat; margin-top: -1.5rem;">
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity: 0.6;"></div>
+
+    <div class="container position-relative z-index-1 text-center text-white">
+        <i class="bi {{ p_info.icon }} mb-2 d-inline-block" style="font-size: 3.5rem; color: {{ p_info.color }}; text-shadow: 0 2px 10px rgba(0,0,0,0.5);"></i>
+        <h1 class="display-4 fw-bolder mb-2 shadow-sm" style="letter-spacing: -1px;">{{ p_info.title }}</h1>
+        <p class="lead fw-light opacity-75">{{ p_info.desc }}</p>
+    </div>
+</div>
+
+<div class="bg-white shadow-sm sticky-top border-bottom py-3" style="top: 0; z-index: 1020;">
+    <div class="container d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+
+        <div class="d-flex align-items-center bg-light p-2 rounded-3 border flex-grow-1" style="max-width: 600px;">
+            <div class="bg-primary bg-opacity-10 text-primary rounded d-flex align-items-center justify-content-center me-2 px-3 py-2">
+                <i class="bi bi-geo-alt-fill fs-5"></i>
+            </div>
+
+            <div class="d-flex flex-grow-1 gap-2">
+                <select id="districtSelect" class="form-select border-0 bg-transparent fw-bold text-dark shadow-none" onchange="updateNeighborhoods()">
+                    <option value="">İlçe Seçin...</option>
+                    <option value="muratpasa">Muratpaşa</option>
+                    <option value="konyaalti">Konyaaltı</option>
+                    <option value="kepez">Kepez</option>
+                    <option value="dosemealti">Döşemealtı</option>
+                    <option value="alanya">Alanya</option>
+                    <option value="manavgat">Manavgat</option>
+                    <option value="kemer">Kemer</option>
+                    <option value="kas">Kaş</option>
+                    <option value="serik">Serik</option>
+                    <option value="aksu">Aksu</option>
+                    <option value="kumluca">Kumluca</option>
+                    <option value="finike">Finike</option>
+                    <option value="demre">Demre</option>
+                    <option value="elmali">Elmalı</option>
+                    <option value="korkuteli">Korkuteli</option>
+                    <option value="akseki">Akseki</option>
+                    <option value="gazipasa">Gazipaşa</option>
+                    <option value="gundogmus">Gündoğmuş</option>
+                    <option value="ibradi">İbradı</option>
+                </select>
+                <div class="vr border-secondary opacity-25"></div>
+                <select id="neighborhoodSelect" class="form-select border-0 bg-transparent text-muted shadow-none" onchange="setLocationFromDropdown()" disabled>
+                    <option value="">Önce İlçe Seçin</option>
+                </select>
+            </div>
+
+            <button class="btn btn-sm btn-outline-primary ms-2" onclick="getLocation()" title="GPS Konumumu Bul">
+                <i class="bi bi-crosshair"></i>
+            </button>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <select id="sortMethod" class="form-select form-select-sm shadow-sm border-secondary text-dark fw-bold" style="width: auto; border-radius: 8px;">
+                <option value="distance">📍 Önce En Yakın</option>
+                <option value="rating">⭐ En İyi Puan</option>
+            </select>
+
+            <button class="btn btn-sm btn-success shadow-sm rounded-3 px-3 fw-bold" id="drawRouteBtn">
+                <i class="bi bi-signpost-split-fill me-1"></i> Gezi
+            </button>
+
+            <button class="btn btn-sm btn-warning shadow-sm rounded-3 px-3 text-dark fw-bold" id="drawFoodRouteBtn">
+                <i class="bi bi-egg-fried me-1"></i> Lezzet
+            </button>
+
+            <div class="btn-group shadow-sm ms-lg-2" role="group">
+                <button type="button" class="btn btn-sm btn-outline-primary active px-3" id="btn-list"><i class="bi bi-grid-fill"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-primary px-3" id="btn-map"><i class="bi bi-map-fill"></i></button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="container mt-2 d-flex justify-content-between align-items-center">
+        <small id="locationStatusText" class="text-muted"><i class="bi bi-info-circle me-1"></i> Rota çizmek için konum seçin.</small>
+
+        <div id="weather-widget" class="badge bg-light text-dark p-1 px-2 border d-inline-flex align-items-center shadow-sm">
+            <span class="spinner-border spinner-border-sm text-info me-2" role="status"></span>
+            <span class="text-muted small">Hava durumu yükleniyor...</span>
+        </div>
+    </div>
+</div>
+
+<div class="explore-content bg-light pb-5" style="min-height: 50vh;">
+
+    <div class="list-view pt-4" id="listView">
+        <div class="container">
+
+            <div class="d-flex justify-content-center mb-5">
+                <div class="bg-white p-1 rounded-pill shadow-sm d-inline-flex border">
+                    <input type="radio" class="btn-check" name="personaFilter" id="filterPersona" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary border-0 rounded-pill px-4 py-2 fw-bold" for="filterPersona">
+                        <i class="bi bi-person-badge-fill me-1"></i> Bana Özel Rota
+                    </label>
+
+                    <input type="radio" class="btn-check" name="personaFilter" id="filterAll" autocomplete="off">
+                    <label class="btn btn-outline-primary border-0 rounded-pill px-4 py-2 fw-bold" for="filterAll">
+                        <i class="bi bi-globe-americas me-1"></i> Tümünü Keşfet
+                    </label>
+                </div>
+            </div>
+
+            <div id="placesList" class="row g-4">
+                <div class="col-12 text-center text-muted py-5" id="loadingSpinner">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <p>Antalya'nın güzellikleri hazırlanıyor...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="map-view d-none pt-4" id="mapView">
+        <div class="container">
+            <div id="mainMap" class="w-100 rounded-4 shadow border border-2 border-white" style="height: 65vh; min-height: 450px; z-index: 1;"></div>
+
+            <div id="routeItinerary" class="mt-4 d-none">
+                <h4 class="fw-bold mb-3" id="itineraryTitle"><i class="bi bi-map text-primary"></i> Planın</h4>
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush" id="routeItineraryList"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<template id="placeCardTemplate">
+    <div class="col-md-6 col-lg-4">
+        <div class="card place-card border-0 shadow-sm rounded-4 h-100 cursor-pointer overflow-hidden d-flex flex-column">
+            <div class="place-image position-relative" style="height: 220px; background: #e0e0e0;">
+                <img src="" alt="" class="w-100 h-100" style="object-fit: cover;">
+                <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-3 rounded-circle fav-btn shadow-sm" style="z-index: 10; width: 35px; height: 35px; transition: transform 0.2s;">
+                    <i class="bi bi-heart fs-6 text-danger" style="line-height: 1.5;"></i>
+                </button>
+                <div class="position-absolute bottom-0 start-0 m-3 badge bg-dark bg-opacity-75 text-warning p-2 rounded-3 shadow-sm border border-secondary place-rating-badge">
+                    <i class="bi bi-star-fill"></i> <span class="place-rating-val">4.5</span>
+                </div>
+            </div>
+            <div class="card-body p-4 d-flex flex-column flex-grow-1">
+                <p class="text-uppercase text-primary fw-bold small mb-1 place-category" style="letter-spacing: 1px;"></p>
+                <h5 class="card-title fw-bold mb-2 place-name text-dark"></h5>
+                <p class="card-text text-muted small mb-4 place-district"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span></span></p>
+
+                <div class="mt-auto d-flex flex-column gap-2">
+                    <button class="btn btn-outline-dark w-100 rounded-pill fw-bold view-details-btn hover-shadow">
+                        Hikayesini Keşfet <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                    <button class="btn btn-outline-success w-100 rounded-pill fw-bold add-to-route-btn shadow-sm d-none">
+                        <i class="bi bi-plus-circle me-1"></i> Rotaya Ekle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    let map;
+    let markers = [];
+    let allPlaces = [];
+    let routeLayer = null;
+    let currentActiveRoute = [];
+    let currentLineColor = "";
+    let currentBadgeClass = "";
+    let currentIsFood = false;
+    let currentTitleHtml = "";
+    let activeRouteType = null; // 'gezi' veya 'lezzet' olduğunu tutacak
+
+    let currentViewFilter = 'persona';
+
+    let userLat = 36.8906;
+    let userLng = 30.7042;
+    let userLocationName = "Merkez";
+
+    const locationData = {
+        'muratpasa': { name: 'Muratpaşa', neighborhoods: [{ id: 'm1', name: 'Kaleiçi (Old Town)', lat: 36.8841, lng: 30.7050 }, { id: 'm2', name: 'Şirinyalı / Lara', lat: 36.8523, lng: 30.7778 }, { id: 'm3', name: 'Işıklar', lat: 36.8805, lng: 30.7103 }, { id: 'm4', name: 'Güzeloba', lat: 36.8456, lng: 30.7936 }] },
+        'konyaalti': { name: 'Konyaaltı', neighborhoods: [{ id: 'k1', name: 'Arapsuyu (5M Migros)', lat: 36.8817, lng: 30.6558 }, { id: 'k2', name: 'Sahil Parkı', lat: 36.8646, lng: 30.6385 }, { id: 'k3', name: 'Liman Mahallesi', lat: 36.8402, lng: 30.6094 }, { id: 'k4', name: 'Hurma', lat: 36.8480, lng: 30.5950 }] },
+        'kepez': { name: 'Kepez', neighborhoods: [{ id: 'kp1', name: 'Dokuma Park', lat: 36.9189, lng: 30.6806 }, { id: 'kp2', name: 'Düdenbaşı (Şelale)', lat: 36.9649, lng: 30.7268 }, { id: 'kp3', name: 'Kültür Mahallesi', lat: 36.9050, lng: 30.6550 }] },
+        'dosemealti': { name: 'Döşemealtı', neighborhoods: [{ id: 'd1', name: 'Yeniköy (Merkez)', lat: 37.0135, lng: 30.5593 }, { id: 'd2', name: 'Yeşilbayır', lat: 36.9850, lng: 30.5830 }] },
+        'alanya': { name: 'Alanya', neighborhoods: [{ id: 'al1', name: 'Merkez', lat: 36.5438, lng: 31.9998 }, { id: 'al2', name: 'Mahmutlar', lat: 36.4893, lng: 32.0945 }, { id: 'al3', name: 'Cleopatra', lat: 36.5398, lng: 31.9774 }] },
+        'manavgat': { name: 'Manavgat', neighborhoods: [{ id: 'mn1', name: 'Merkez', lat: 36.7867, lng: 31.4431 }, { id: 'mn2', name: 'Side', lat: 36.7690, lng: 31.3905 }, { id: 'mn3', name: 'Çolaklı', lat: 36.8080, lng: 31.3120 }] },
+        'kemer': { name: 'Kemer', neighborhoods: [{ id: 'km1', name: 'Merkez', lat: 36.6011, lng: 30.5590 }, { id: 'km2', name: 'Göynük', lat: 36.6667, lng: 30.5550 }, { id: 'km3', name: 'Beldibi', lat: 36.7214, lng: 30.5622 }] },
+        'kas': { name: 'Kaş', neighborhoods: [{ id: 'ks1', name: 'Merkez', lat: 36.1994, lng: 29.6377 }, { id: 'ks2', name: 'Kalkan', lat: 36.2642, lng: 29.4140 }, { id: 'ks3', name: 'Çukurbağ', lat: 36.2167, lng: 29.6000 }] },
+        'serik': { name: 'Serik', neighborhoods: [{ id: 'sr1', name: 'Merkez', lat: 36.9175, lng: 31.1000 }, { id: 'sr2', name: 'Belek', lat: 36.8622, lng: 31.0560 }, { id: 'sr3', name: 'Kadriye', lat: 36.8167, lng: 30.9833 }] },
+        'aksu': { name: 'Aksu', neighborhoods: [{ id: 'ak1', name: 'Merkez', lat: 36.9500, lng: 30.8333 }, { id: 'ak2', name: 'Kundu (Lara Plajı)', lat: 36.8550, lng: 30.8750 }, { id: 'ak3', name: 'Kurşunlu', lat: 37.0000, lng: 30.8167 }] },
+        'kumluca': { name: 'Kumluca', neighborhoods: [{ id: 'ku1', name: 'Merkez', lat: 36.3703, lng: 30.2869 }, { id: 'ku2', name: 'Olimpos (Yazır)', lat: 36.3983, lng: 30.4633 }, { id: 'ku3', name: 'Adrasan', lat: 36.3075, lng: 30.4650 }] },
+        'finike': { name: 'Finike', neighborhoods: [{ id: 'fn1', name: 'Merkez', lat: 36.2956, lng: 30.1414 }, { id: 'fn2', name: 'Sahilkent', lat: 36.3100, lng: 30.1600 }] },
+        'demre': { name: 'Demre', neighborhoods: [{ id: 'dm1', name: 'Merkez', lat: 36.2444, lng: 29.9789 }, { id: 'dm2', name: 'Kekova / Üçağız', lat: 36.1950, lng: 29.8450 }] },
+        'elmali': { name: 'Elmalı', neighborhoods: [{ id: 'el1', name: 'Merkez', lat: 36.7369, lng: 29.9156 }, { id: 'el2', name: 'Akçay', lat: 36.6500, lng: 29.9000 }] },
+        'korkuteli': { name: 'Korkuteli', neighborhoods: [{ id: 'kr1', name: 'Merkez', lat: 37.0653, lng: 30.1969 }, { id: 'kr2', name: 'Yelten', lat: 37.0500, lng: 30.2500 }] },
+        'akseki': { name: 'Akseki', neighborhoods: [{ id: 'as1', name: 'Merkez', lat: 37.0469, lng: 31.7925 }] },
+        'gazipasa': { name: 'Gazipaşa', neighborhoods: [{ id: 'gz1', name: 'Merkez', lat: 36.2694, lng: 32.3175 }, { id: 'gz2', name: 'Kahyalar', lat: 36.2800, lng: 32.2500 }] },
+        'gundogmus': { name: 'Gündoğmuş', neighborhoods: [{ id: 'gd1', name: 'Merkez', lat: 36.8125, lng: 31.9967 }] },
+        'ibradi': { name: 'İbradı', neighborhoods: [{ id: 'ib1', name: 'Merkez', lat: 37.0950, lng: 31.5975 }, { id: 'ib2', name: 'Ormana', lat: 37.1167, lng: 31.6333 }] }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initLocationSession();
+        initMap();
+        loadPlaces();
+        loadWeather();
+
+        document.getElementById('filterPersona').addEventListener('change', function() {
+            if(this.checked) { currentViewFilter = 'persona'; renderFilteredPlaces(); }
+        });
+
+        document.getElementById('filterAll').addEventListener('change', function() {
+            if(this.checked) { currentViewFilter = 'all'; renderFilteredPlaces(); }
+        });
+    });
+
+    // =========================================================
+    // YENİ: KONUM DEĞİŞTİĞİNDE ROTAYI ANINDA TETİKLE
+    // =========================================================
+    function triggerRouteRefresh() {
+        if (activeRouteType === 'gezi') {
+            document.getElementById('drawRouteBtn').click();
+        } else if (activeRouteType === 'lezzet') {
+            document.getElementById('drawFoodRouteBtn').click();
+        }
+    }
+
+    function updateNeighborhoods() {
+        const districtSelect = document.getElementById('districtSelect');
+        const neighborhoodSelect = document.getElementById('neighborhoodSelect');
+        const selectedDistrict = districtSelect.value;
+        neighborhoodSelect.innerHTML = '<option value="">Semt / Mahalle Seçin</option>';
+        if(selectedDistrict && locationData[selectedDistrict]) {
+            locationData[selectedDistrict].neighborhoods.forEach(hood => {
+                let opt = document.createElement('option');
+                opt.value = hood.id; opt.dataset.lat = hood.lat; opt.dataset.lng = hood.lng;
+                opt.dataset.name = hood.name; opt.textContent = hood.name;
+                neighborhoodSelect.appendChild(opt);
+            });
+            neighborhoodSelect.disabled = false;
+        } else {
+            neighborhoodSelect.disabled = true;
+        }
+    }
+
+    function setLocationFromDropdown() {
+        const select = document.getElementById('neighborhoodSelect');
+        const districtSelect = document.getElementById('districtSelect');
+
+        if(select.value) {
+            const selectedOpt = select.options[select.selectedIndex];
+            const distName = locationData[districtSelect.value].name;
+
+            userLat = parseFloat(selectedOpt.dataset.lat);
+            userLng = parseFloat(selectedOpt.dataset.lng);
+            userLocationName = `${distName}, ${selectedOpt.dataset.name}`;
+
+            sessionStorage.setItem('userLat', userLat);
+            sessionStorage.setItem('userLng', userLng);
+            sessionStorage.setItem('userLocationName', userLocationName);
+
+            document.getElementById('locationStatusText').innerHTML = `<span class="text-success fw-bold"><i class="bi bi-geo-alt-fill"></i> Başlangıç Noktanız: ${userLocationName}</span>`;
+            map.flyTo([userLat, userLng], 14, { duration: 1.5 });
+
+            // Konum değişti, rotayı anında güncelle!
+            setTimeout(triggerRouteRefresh, 1600);
+        }
+    }
+
+    function getLocation() {
+        const statusText = document.getElementById('locationStatusText');
+        statusText.innerHTML = '<span class="spinner-border spinner-border-sm text-primary"></span> GPS aranıyor...';
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                userLat = position.coords.latitude;
+                userLng = position.coords.longitude;
+                userLocationName = "Canlı Konumunuz";
+                sessionStorage.setItem('userLat', userLat);
+                sessionStorage.setItem('userLng', userLng);
+                sessionStorage.setItem('userLocationName', userLocationName);
+                statusText.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-crosshair"></i> GPS Konumu Alındı!</span>`;
+                map.flyTo([userLat, userLng], 15, { duration: 1.5 });
+
+                // Konum değişti, rotayı anında güncelle!
+                setTimeout(triggerRouteRefresh, 1600);
+            });
+        }
+    }
+
+    function initLocationSession() {
+        const savedLat = sessionStorage.getItem('userLat');
+        const savedLng = sessionStorage.getItem('userLng');
+        const savedName = sessionStorage.getItem('userLocationName');
+
+        if(savedLat && savedLng && savedName) {
+            userLat = parseFloat(savedLat);
+            userLng = parseFloat(savedLng);
+            userLocationName = savedName;
+            document.getElementById('locationStatusText').innerHTML = `<span class="text-success fw-bold"><i class="bi bi-geo-alt-fill"></i> Başlangıç Noktanız: ${userLocationName}</span>`;
+        }
+    }
+
+    function loadWeather() {
+        fetch('/api/weather')
+            .then(response => response.json())
+            .then(data => {
+                const weatherWidget = document.getElementById('weather-widget');
+                if(data.success) {
+                    const w = data.data;
+                    const iconUrl = `https://openweathermap.org/img/wn/${w.icon}.png`;
+                    weatherWidget.innerHTML = `<img src="${iconUrl}" width="20" height="20" class="me-1"><strong class="text-primary me-1">${w.temp}°C</strong><span class="text-muted small">${w.description}</span>`;
+                } else {
+                    weatherWidget.innerHTML = `<span class="text-danger small"><i class="bi bi-cloud-slash"></i> Hava durumu alınamadı</span>`;
+                }
+            });
+    }
+
+    function initMap() {
+        map = L.map('mainMap').setView([36.8969, 30.7133], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    }
+
+    function loadPlaces() {
+        fetch('/api/places')
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    allPlaces = data.data;
+                    renderFilteredPlaces();
+                } else {
+                    document.getElementById('placesList').innerHTML = '<p class="text-danger text-center w-100">Veriler çekilemedi.</p>';
+                }
+            });
+    }
+
+    function renderFilteredPlaces() {
+        const container = document.getElementById('placesList');
+        container.innerHTML = '';
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+
+        if (currentViewFilter === 'persona') {
+            const personaMatches = allPlaces.filter(p => p.is_persona_match);
+            const others = allPlaces.filter(p => !p.is_persona_match);
+
+            if(personaMatches.length > 0) {
+                renderCardGroup(container, personaMatches, false);
+            } else {
+                container.innerHTML = '<div class="col-12 text-center py-5"><h5 class="text-muted">Bu kategoriye uygun mekan bulunamadı.</h5></div>';
+            }
+
+            if(others.length > 0) {
+                const divider = document.createElement('div');
+                divider.className = "col-12 mt-5 mb-4 text-center";
+                divider.innerHTML = `
+                    <h4 class="fw-bold text-muted"><i class="bi bi-stars text-warning fs-3"></i> Görmek İsteyebileceğiniz Diğer Yerler</h4>
+                    <p class="text-muted small">Personanıza ait olmasa da rotanıza tek tıkla ekleyebileceğiniz popüler alternatifler.</p>
+                    <hr class="w-25 mx-auto border-secondary">
+                `;
+                container.appendChild(divider);
+                renderCardGroup(container, others, true);
+            }
+        } else {
+            renderCardGroup(container, allPlaces, false);
+        }
+    }
+
+    function renderCardGroup(container, placesArray, isOtherSection) {
+        placesArray.forEach(place => {
+            const template = document.getElementById('placeCardTemplate');
+            const card = template.content.cloneNode(true);
+
+            card.querySelector('.place-name').textContent = place.name;
+            card.querySelector('.place-district span').textContent = place.district;
+            card.querySelector('.place-rating-val').textContent = place.rating || '4.5';
+
+            let catName = place.category || 'Mekan';
+            if(catName === 'historical') catName = 'Tarihi Yer';
+            if(catName === 'nature') catName = 'Doğa & Manzara';
+            if(catName === 'beach') catName = 'Plaj & Deniz';
+            if(catName === 'museum') catName = 'Müze';
+            if(catName === 'gurme') catName = 'Lezzet Durağı';
+            card.querySelector('.place-category').textContent = catName;
+
+            if (place.image_url) card.querySelector('.place-image img').src = place.image_url;
+
+            card.querySelector('.view-details-btn').addEventListener('click', () => {
+                window.location.href = '/place/' + place.id;
+            });
+
+            // "Diğer Yerler" bölümündeyse ROTAYA EKLE butonunu aktif et
+            const addRouteBtn = card.querySelector('.add-to-route-btn');
+            if (isOtherSection) {
+                addRouteBtn.classList.remove('d-none');
+                addRouteBtn.addEventListener('click', () => {
+                    place.force_route = true; // Bu mekanı zorla rotaya sokuyoruz
+
+                    // YENİ: Şık SweetAlert2 Bildirimi
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Harika Seçim!',
+                        text: `${place.name} başarıyla rotanıza dahil edildi. Gezi rotası yeniden çiziliyor...`,
+                        showConfirmButton: false,
+                        timer: 2000,
+                        toast: true,
+                        position: 'top-end',
+                        background: '#f8f9fa',
+                        color: '#2c3e50',
+                        iconColor: '#198754'
+                    });
+
+                    setTimeout(() => {
+                        document.getElementById('drawRouteBtn').click();
+                    }, 500); // Popup göründükten hemen sonra çizmeyi tetikle
+                });
+            } else {
+                addRouteBtn.remove(); // Normal listede zaten rotada olduğu için butonu siliyoruz
+            }
+
+            const favBtn = card.querySelector('.fav-btn');
+            const favIcon = favBtn.querySelector('i');
+
+            if(place.is_favorite) {
+                favIcon.classList.remove('bi-heart');
+                favIcon.classList.add('bi-heart-fill');
+            }
+
+            favBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                favIcon.style.transform = "scale(1.3)";
+                setTimeout(() => favIcon.style.transform = "scale(1)", 200);
+
+                fetch('/api/favorites/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: place.category ? 'place' : 'restaurant', id: place.id })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        if(data.status === 'added') {
+                            favIcon.classList.remove('bi-heart');
+                            favIcon.classList.add('bi-heart-fill');
+                        } else {
+                            favIcon.classList.remove('bi-heart-fill');
+                            favIcon.classList.add('bi-heart');
+                        }
+                    }
+                });
+            });
+
+            container.appendChild(card);
+
+            if (place.latitude && place.longitude) {
+                const marker = L.marker([place.latitude, place.longitude]).addTo(map);
+                marker.bindPopup(`<b>${place.name}</b>`);
+                markers.push(marker);
+            }
+        });
+    }
+
+    // =========================================================
+    // HAVERSINE FORMÜLÜ (GERÇEK DÜNYA MESAFESİ)
+    // =========================================================
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Dünya yarıçapı (km)
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // GEZİ ROTASI ÇİZİMİ
+    document.getElementById('drawRouteBtn').addEventListener('click', function() {
+        activeRouteType = 'gezi';
+        const btn = this;
+        const sortMethod = document.getElementById('sortMethod').value;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>...';
+
+        let validPlaces = allPlaces.filter(p => p.latitude && p.longitude);
+        if (validPlaces.length === 0) return;
+
+        document.getElementById('btn-map').click();
+
+        let startPoint = { id: 0, name: userLocationName, latitude: userLat, longitude: userLng, district: "Başlangıç" };
+
+        let filteredPlaces = validPlaces;
+        if (currentViewFilter === 'persona') {
+            filteredPlaces = validPlaces.filter(p => p.is_persona_match || p.force_route);
+        }
+
+        let unvisited = [...filteredPlaces];
+        let currentPoint = startPoint;
+        let sortedRoute = [currentPoint];
+
+        if (sortMethod === 'distance') {
+            while(unvisited.length > 0) {
+                let nearestIdx = 0, minDist = Infinity;
+                for(let i = 0; i < unvisited.length; i++) {
+                    let d = calculateDistance(currentPoint.latitude, currentPoint.longitude, unvisited[i].latitude, unvisited[i].longitude);
+                    if(d < minDist) { minDist = d; nearestIdx = i; }
+                }
+                currentPoint = unvisited[nearestIdx];
+                sortedRoute.push(currentPoint);
+                unvisited.splice(nearestIdx, 1);
+            }
+        } else if (sortMethod === 'rating') {
+            unvisited.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            sortedRoute = [startPoint, ...unvisited];
+        }
+
+        drawOnMap(sortedRoute, '#ff4757', '<i class="bi bi-map text-primary"></i> Durak Gezi Planın', 'primary', false);
+        btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Çizildi!';
+        setTimeout(() => { btn.innerHTML = '<i class="bi bi-signpost-split-fill me-1"></i> Gezi'; }, 2000);
+    });
+
+    // LEZZET ROTASI ÇİZİMİ
+    document.getElementById('drawFoodRouteBtn').addEventListener('click', function() {
+        activeRouteType = 'lezzet';
+        const btn = this;
+        const sortMethod = document.getElementById('sortMethod').value;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>...';
+
+        fetch('/api/restaurants')
+            .then(res => res.json())
+            .then(data => {
+                if(data.success && data.data.length > 0) {
+                    let suitableRests = data.data.filter(r => r.latitude && r.longitude && r.is_suitable);
+
+                    if(suitableRests.length === 0) {
+                        alert("Şu anda seçili konum etrafında diyetine uygun restoran bulunamadı!");
+                        btn.innerHTML = '<i class="bi bi-egg-fried me-1"></i> Lezzet';
+                        return;
+                    }
+
+                    if (currentViewFilter === 'persona') {
+                        suitableRests = suitableRests.slice(0, 10);
+                    }
+
+                    document.getElementById('btn-map').click();
+
+                    let startPoint = { id: 0, name: userLocationName, latitude: userLat, longitude: userLng, district: "Başlangıç", is_favorite: false };
+
+                    let unvisited = [...suitableRests];
+                    let currentPoint = startPoint;
+                    let sortedRoute = [currentPoint];
+
+                    if (sortMethod === 'distance') {
+                        while(unvisited.length > 0) {
+                            let nearestIdx = 0, minDist = Infinity;
+                            for(let i = 0; i < unvisited.length; i++) {
+                                let d = calculateDistance(currentPoint.latitude, currentPoint.longitude, unvisited[i].latitude, unvisited[i].longitude);
+                                if (unvisited[i].is_favorite) d = d * 0.4;
+                                if(d < minDist) { minDist = d; nearestIdx = i; }
+                            }
+                            currentPoint = unvisited[nearestIdx];
+                            sortedRoute.push(currentPoint);
+                            unvisited.splice(nearestIdx, 1);
+                        }
+                    } else if (sortMethod === 'rating') {
+                        unvisited.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                        sortedRoute = [startPoint, ...unvisited];
+                    }
+
+                    drawOnMap(sortedRoute, '#f39c12', '<i class="bi bi-egg-fried text-warning"></i> Durak Lezzet Rotan', 'warning', true);
+
+                    btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Çizildi!';
+                    setTimeout(() => { btn.innerHTML = '<i class="bi bi-egg-fried me-1"></i> Lezzet'; }, 2000);
+                } else {
+                    alert("Sistemde şu an hiç restoran bulunamadı.");
+                    btn.innerHTML = '<i class="bi bi-egg-fried me-1"></i> Lezzet';
+                }
+            });
+    });
+
+    function removePlaceFromRoute(indexToRemove) {
+        if (currentActiveRoute.length <= 2) {
+            alert("Rotada en az 1 durak kalmalı!");
+            return;
+        }
+        currentActiveRoute.splice(indexToRemove, 1);
+        drawOnMap(currentActiveRoute, currentLineColor, currentTitleHtml, currentBadgeClass, currentIsFood);
+    }
+
+    function drawOnMap(sortedRoute, lineColor, titleHtml, badgeClass, isFood = false) {
+        if (routeLayer) map.removeLayer(routeLayer);
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+
+        currentActiveRoute = sortedRoute;
+        currentLineColor = lineColor;
+        currentBadgeClass = badgeClass;
+        currentIsFood = isFood;
+        currentTitleHtml = titleHtml;
+
+        let routeCoords = [];
+        const itineraryList = document.getElementById('routeItineraryList');
+        itineraryList.innerHTML = '';
+        document.getElementById('itineraryTitle').innerHTML = titleHtml;
+
+        sortedRoute.forEach((p, index) => {
+            if(p.latitude && p.longitude) {
+                routeCoords.push([p.latitude, p.longitude]);
+
+                const marker = L.marker([p.latitude, p.longitude]).addTo(map);
+                let favEmoji = (isFood && p.is_favorite) ? "💖 " : "";
+                let labelText = index === 0 ? "📍 Başlangıç" : `<b>${index}. Durak:</b> ${favEmoji}${p.name}`;
+
+                marker.bindTooltip(labelText, {
+                    permanent: true, direction: 'top', offset: [0, -30], className: 'custom-map-label'
+                }).openTooltip();
+                markers.push(marker);
+
+                if (index > 0) {
+                    let favBadge = (isFood && p.is_favorite) ? '<span class="badge bg-danger rounded-pill ms-2">Favorin ❤️</span>' : '';
+
+                    let extraInfo = '';
+                    if (isFood) {
+                        let openBadge = p.is_open
+                            ? '<span class="badge bg-success shadow-sm">Şu An Açık</span>'
+                            : '<span class="badge bg-danger shadow-sm">Kapalı</span>';
+                        let priceBadge = `<span class="badge bg-light text-success border border-success shadow-sm">${p.price_level || '₺₺'}</span>`;
+
+                        extraInfo = `
+                            <span class="badge bg-secondary opacity-75"><i class="bi bi-info-circle"></i> ${p.diet_category ? p.diet_category.toUpperCase() : 'STANDART'}</span>
+                            ${priceBadge}
+                            ${openBadge}
+                            <small class="text-muted" style="font-size: 0.75rem; white-space: nowrap;">(${p.opening_time || '09:00'} - ${p.closing_time || '23:30'})</small>
+                        `;
+                    } else {
+                        let catName = p.category || 'Mekan';
+                        if(catName === 'historical') catName = 'Tarihi Yer';
+                        if(catName === 'nature') catName = 'Doğa & Manzara';
+                        if(catName === 'beach') catName = 'Plaj & Deniz';
+                        if(catName === 'museum') catName = 'Müze';
+                        if(catName === 'gurme') catName = 'Lezzet Durağı';
+                        extraInfo = `<small class="text-muted"><i class="bi bi-info-circle"></i> ${catName.toUpperCase()}</small>`;
+                    }
+
+                    let mapsLink = `https://www.google.com/maps?q=${p.latitude},${p.longitude}`;
+                    let weatherId = `weather-spot-${index}`;
+
+                    let detailLink = isFood ? `/restaurant/${p.id}` : `/place/${p.id}`;
+
+                    itineraryList.innerHTML += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-4 hover-bg-light border-bottom">
+                            <div class="flex-grow-1">
+                                <span class="badge bg-${badgeClass} rounded-circle me-3 p-2 text-dark fs-6">${index}</span>
+                                <span class="fw-bold fs-5 text-dark">${p.name}</span> ${favBadge}
+                                <span class="badge bg-light text-warning border ms-2"><i class="bi bi-star-fill"></i> ${p.rating || '4.5'}</span>
+                                <div class="mt-2 d-flex align-items-center gap-3 flex-wrap">
+                                    <span class="text-muted small"><i class="bi bi-geo-alt-fill text-danger"></i> ${p.district}</span>
+                                    ${extraInfo}
+                                    <span id="${weatherId}" class="badge bg-info text-white shadow-sm d-inline-flex align-items-center px-2 py-1">
+                                        <span class="spinner-border spinner-border-sm" style="width: 0.8rem; height: 0.8rem;"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column gap-2 ms-3">
+                                <a href="${detailLink}" class="btn btn-sm btn-outline-dark rounded-pill shadow-sm px-3">
+                                    <i class="bi bi-chat-text-fill me-1"></i> Detay & Yorum
+                                </a>
+                                <a href="${mapsLink}" target="_blank" class="btn btn-sm btn-primary rounded-pill shadow-sm px-3">
+                                    <i class="bi bi-cursor-fill me-1"></i> Git
+                                </a>
+                                <button onclick="removePlaceFromRoute(${index})" class="btn btn-sm btn-outline-danger rounded-pill shadow-sm px-3">
+                                    <i class="bi bi-trash-fill me-1"></i> Sil
+                                </button>
+                            </div>
+                        </li>
+                    `;
+
+                    fetch(`/api/weather/coords?lat=${p.latitude}&lon=${p.longitude}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const wBox = document.getElementById(weatherId);
+                            if(data.success && wBox) {
+                                const iconUrl = `https://openweathermap.org/img/wn/${data.data.icon}.png`;
+                                wBox.innerHTML = `<img src="${iconUrl}" width="18" height="18" class="me-1" style="margin-top:-2px"> ${data.data.temp}°C ${data.data.description}`;
+                            } else if (wBox) { wBox.innerHTML = "Hava Alınamadı"; }
+                        });
+                }
+            }
+        });
+
+        routeLayer = L.polyline(routeCoords, {
+            color: lineColor, weight: 6, opacity: 0.9, dashArray: '10, 15', lineJoin: 'round'
+        }).addTo(map);
+
+        map.fitBounds(routeLayer.getBounds(), {padding: [50, 50]});
+        document.getElementById('routeItinerary').classList.remove('d-none');
+    }
+
+    document.getElementById('btn-list').addEventListener('click', function() {
+        this.classList.replace('btn-outline-primary', 'btn-primary');
+        document.getElementById('btn-map').classList.replace('btn-primary', 'btn-outline-primary');
+        document.getElementById('mapView').classList.add('d-none');
+        document.getElementById('listView').classList.remove('d-none');
+    });
+
+    document.getElementById('btn-map').addEventListener('click', function() {
+        this.classList.replace('btn-outline-primary', 'btn-primary');
+        document.getElementById('btn-list').classList.replace('btn-primary', 'btn-outline-primary');
+        document.getElementById('listView').classList.add('d-none');
+        document.getElementById('mapView').classList.remove('d-none');
+        setTimeout(() => map.invalidateSize(), 100);
+    });
+</script>
+
+<style>
+    .place-card { transition: all 0.3s ease; }
+    .place-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important; }
+    .hover-shadow:hover { background-color: #2c3e50; color: white; }
+    .custom-map-label { background-color: rgba(255, 255, 255, 0.95); border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 5px 10px; font-size: 13px; font-weight: bold; color: #333; }
+    .hover-bg-light:hover { background-color: #f8f9fa; transition: background-color 0.2s ease; }
+    .z-index-1 { z-index: 1; }
+</style>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Tarzını Belirle - PersonaAntalya{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+
+            <div class="text-center mb-5">
+                {% if current_user.selected_persona %}
+                    <h2 class="fw-bolder display-6 text-dark" style="letter-spacing: -1px;">Tercihlerini Güncelle ⚙️</h2>
+                    <p class="text-muted lead">Antalya'yı farklı bir gözle keşfetmek istersen karakterini dilediğin zaman değiştirebilirsin.</p>
+                {% else %}
+                    <h2 class="fw-bolder display-6 text-dark" style="letter-spacing: -1px;">Aramıza Hoş Geldin! 🎉</h2>
+                    <p class="text-muted lead">Sana en uygun rotaları çizebilmemiz için tarzını ve beslenme tercihini belirle.</p>
+                {% endif %}
+            </div>
+
+            <form method="POST" action="">
+
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-4 border-bottom pb-3"><i class="bi bi-person-bounding-box text-warning me-2"></i>1. Antalya'daki Ruh Halin Nedir?</h4>
+
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-4">
+                            <label class="w-100 cursor-pointer h-100" for="persona_influencer">
+                                <input type="radio" name="persona" id="persona_influencer" value="Influencer" class="d-none persona-radio" required {% if current_user.selected_persona == 'Influencer' %}checked{% endif %}>
+                                <div class="card text-white border-0 overflow-hidden rounded-4 shadow-sm h-100 visual-card">
+                                    <img src="{{ url_for('static', filename='images/influencer.jpg') }}" class="card-img h-100" style="object-fit: cover; min-height: 220px;" alt="Influencer">
+                                    <div class="card-img-overlay d-flex flex-column justify-content-end p-4 gradient-overlay">
+                                        <h4 class="card-title fw-bold mb-1"><i class="bi bi-camera-fill text-warning me-2"></i>Influencer</h4>
+                                        <p class="card-text small mb-0 opacity-75">En estetik açılar ve trend mekanlar.</p>
+                                    </div>
+                                    <div class="check-icon position-absolute top-0 end-0 m-3"><i class="bi bi-check-circle-fill fs-3 text-warning shadow-sm rounded-circle"></i></div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <label class="w-100 cursor-pointer h-100" for="persona_tarihci">
+                                <input type="radio" name="persona" id="persona_tarihci" value="Tarihçi" class="d-none persona-radio" required {% if current_user.selected_persona == 'Tarihçi' %}checked{% endif %}>
+                                <div class="card text-white border-0 overflow-hidden rounded-4 shadow-sm h-100 visual-card">
+                                    <img src="{{ url_for('static', filename='images/tarihci.jpg') }}" class="card-img h-100" style="object-fit: cover; min-height: 220px;" alt="Tarihçi">
+                                    <div class="card-img-overlay d-flex flex-column justify-content-end p-4 gradient-overlay">
+                                        <h4 class="card-title fw-bold mb-1"><i class="bi bi-bank text-warning me-2"></i>Tarihçi</h4>
+                                        <p class="card-text small mb-0 opacity-75">Antik çağların ve sırların peşinde.</p>
+                                    </div>
+                                    <div class="check-icon position-absolute top-0 end-0 m-3"><i class="bi bi-check-circle-fill fs-3 text-warning shadow-sm rounded-circle"></i></div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <label class="w-100 cursor-pointer h-100" for="persona_efsane">
+                                <input type="radio" name="persona" id="persona_efsane" value="Efsane Avcısı" class="d-none persona-radio" required {% if current_user.selected_persona == 'Efsane Avcısı' %}checked{% endif %}>
+                                <div class="card text-white border-0 overflow-hidden rounded-4 shadow-sm h-100 visual-card">
+                                    <img src="{{ url_for('static', filename='images/efsane.jpg') }}" class="card-img h-100" style="object-fit: cover; min-height: 220px;" alt="Efsane Avcısı">
+                                    <div class="card-img-overlay d-flex flex-column justify-content-end p-4 gradient-overlay">
+                                        <h4 class="card-title fw-bold mb-1"><i class="bi bi-compass-fill text-warning me-2"></i>Efsane Avcısı</h4>
+                                        <p class="card-text small mb-0 opacity-75">Gizemli yerler ve şehir efsaneleri.</p>
+                                    </div>
+                                    <div class="check-icon position-absolute top-0 end-0 m-3"><i class="bi bi-check-circle-fill fs-3 text-warning shadow-sm rounded-circle"></i></div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="col-md-6 col-lg-6">
+                            <label class="w-100 cursor-pointer h-100" for="persona_masalci">
+                                <input type="radio" name="persona" id="persona_masalci" value="Masalcı" class="d-none persona-radio" required {% if current_user.selected_persona == 'Masalcı' %}checked{% endif %}>
+                                <div class="card text-white border-0 overflow-hidden rounded-4 shadow-sm h-100 visual-card">
+                                    <img src="{{ url_for('static', filename='images/masalci.jpg') }}" class="card-img h-100" style="object-fit: cover; min-height: 220px;" alt="Masalcı">
+                                    <div class="card-img-overlay d-flex flex-column justify-content-end p-4 gradient-overlay">
+                                        <h4 class="card-title fw-bold mb-1"><i class="bi bi-book-half text-warning me-2"></i>Masalcı</h4>
+                                        <p class="card-text small mb-0 opacity-75">Duygusal, şiirsel ve masalsı bir gezi.</p>
+                                    </div>
+                                    <div class="check-icon position-absolute top-0 end-0 m-3"><i class="bi bi-check-circle-fill fs-3 text-warning shadow-sm rounded-circle"></i></div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="col-md-12 col-lg-6">
+                            <label class="w-100 cursor-pointer h-100" for="persona_gurme">
+                                <input type="radio" name="persona" id="persona_gurme" value="Gurme" class="d-none persona-radio" required {% if current_user.selected_persona == 'Gurme' %}checked{% endif %}>
+                                <div class="card text-white border-0 overflow-hidden rounded-4 shadow-sm h-100 visual-card">
+                                    <img src="{{ url_for('static', filename='images/gurme.jpg') }}" class="card-img h-100" style="object-fit: cover; min-height: 220px;" alt="Gurme">
+                                    <div class="card-img-overlay d-flex flex-column justify-content-end p-4 gradient-overlay">
+                                        <h4 class="card-title fw-bold mb-1"><i class="bi bi-cup-hot-fill text-warning me-2"></i>Gurme</h4>
+                                        <p class="card-text small mb-0 opacity-75">Lezzet durakları ve eşsiz gastronomi deneyimi.</p>
+                                    </div>
+                                    <div class="check-icon position-absolute top-0 end-0 m-3"><i class="bi bi-check-circle-fill fs-3 text-warning shadow-sm rounded-circle"></i></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-4 border-bottom pb-3"><i class="bi bi-heart-pulse text-danger me-2"></i>2. Beslenme Tercihin Nedir?</h4>
+
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <label class="w-100 cursor-pointer" for="diet_standart">
+                                <input type="radio" name="diet" id="diet_standart" value="Standart" class="d-none diet-radio" required {% if current_user.diet_preference == 'Standart' or not current_user.diet_preference %}checked{% endif %}>
+                                <div class="card diet-card text-center p-4 rounded-4 shadow-sm border border-2 h-100">
+                                    <i class="bi bi-egg-fried fs-1 mb-2 text-secondary icon-color"></i>
+                                    <h6 class="fw-bold mb-0">Standart</h6>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="w-100 cursor-pointer" for="diet_vegan">
+                                <input type="radio" name="diet" id="diet_vegan" value="Vegan" class="d-none diet-radio" required {% if current_user.diet_preference == 'Vegan' %}checked{% endif %}>
+                                <div class="card diet-card text-center p-4 rounded-4 shadow-sm border border-2 h-100">
+                                    <i class="bi bi-tree-fill fs-1 mb-2 text-success icon-color"></i>
+                                    <h6 class="fw-bold mb-0">Vegan</h6>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="w-100 cursor-pointer" for="diet_vejetaryen">
+                                <input type="radio" name="diet" id="diet_vejetaryen" value="Vejetaryen" class="d-none diet-radio" required {% if current_user.diet_preference == 'Vejetaryen' %}checked{% endif %}>
+                                <div class="card diet-card text-center p-4 rounded-4 shadow-sm border border-2 h-100">
+                                    <i class="bi bi-flower1 fs-1 mb-2 text-info icon-color"></i>
+                                    <h6 class="fw-bold mb-0">Vejetaryen</h6>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="w-100 cursor-pointer" for="diet_glutensiz">
+                                <input type="radio" name="diet" id="diet_glutensiz" value="Glutensiz" class="d-none diet-radio" required {% if current_user.diet_preference == 'Glutensiz' %}checked{% endif %}>
+                                <div class="card diet-card text-center p-4 rounded-4 shadow-sm border border-2 h-100">
+                                    <i class="bi bi-x-octagon-fill fs-1 mb-2 text-warning icon-color"></i>
+                                    <h6 class="fw-bold mb-0">Glutensiz</h6>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end border-top pt-4">
+                    <button type="submit" class="btn btn-warning btn-lg fw-bold shadow px-5 rounded-pill hero-btn" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border: none; color: white;">
+                        {% if current_user.selected_persona %}Seçimleri Kaydet ve Rota Çiz{% else %}Keşfetmeye Başla <i class="bi bi-rocket-takeoff ms-2"></i>{% endif %}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+
+    /* --- GÖRSEL PERSONA KARTLARI --- */
+    .visual-card {
+        transition: all 0.3s ease;
+        border: 4px solid transparent !important;
+        opacity: 0.85;
+    }
+    .gradient-overlay {
+        background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+    }
+    .check-icon {
+        display: none; /* Varsayılan olarak kapalı */
+    }
+    .visual-card:hover {
+        opacity: 1;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+    }
+
+    /* Persona Seçildiğinde Olacaklar */
+    .persona-radio:checked + .visual-card {
+        border-color: #f39c12 !important;
+        opacity: 1;
+        transform: scale(1.02);
+        box-shadow: 0 10px 25px rgba(243, 156, 18, 0.4) !important;
+    }
+    .persona-radio:checked + .visual-card .check-icon {
+        display: block; /* Tik işaretini göster */
+        animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .persona-radio:checked + .visual-card img {
+        filter: brightness(1.1);
+    }
+
+    /* --- DİYET KARTLARI --- */
+    .diet-card {
+        transition: all 0.2s ease;
+        border-color: #dee2e6 !important;
+        background-color: #f8f9fa;
+    }
+    .diet-card:hover {
+        border-color: #adb5bd !important;
+        background-color: #fff;
+    }
+    /* Diyet Seçildiğinde Olacaklar */
+    .diet-radio:checked + .diet-card {
+        border-color: #f39c12 !important;
+        background-color: #fff;
+        box-shadow: 0 5px 15px rgba(243, 156, 18, 0.2) !important;
+        color: #d35400;
+    }
+    .diet-radio:checked + .diet-card .icon-color {
+        color: #f39c12 !important;
+        transform: scale(1.2);
+        transition: transform 0.3s ease;
+    }
+
+    .hero-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(243, 156, 18, 0.4) !important;
+        transition: all 0.3s ease;
+    }
+
+    @keyframes popIn {
+        0% { transform: scale(0); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}

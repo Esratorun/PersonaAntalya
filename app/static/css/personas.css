@@ -1,0 +1,15 @@
+/* Sadece İnce Dokunuşlar ve Vurgular İçin Dinamik Renkler */
+.persona-influencer .btn-primary, .persona-influencer .active { background-color: #e1306c !important; border-color: #e1306c !important; }
+.persona-influencer .text-primary { color: #e1306c !important; }
+
+.persona-tarihci .btn-primary, .persona-tarihci .active { background-color: #8e44ad !important; border-color: #8e44ad !important; }
+.persona-tarihci .text-primary { color: #8e44ad !important; }
+
+.persona-masalci .btn-primary, .persona-masalci .active { background-color: #9b59b6 !important; border-color: #9b59b6 !important; }
+.persona-masalci .text-primary { color: #9b59b6 !important; }
+
+.persona-gurme .btn-primary, .persona-gurme .active { background-color: #d35400 !important; border-color: #d35400 !important; }
+.persona-gurme .text-primary { color: #d35400 !important; }
+
+.persona-efsane .btn-primary, .persona-efsane .active { background-color: #16a085 !important; border-color: #16a085 !important; }
+.persona-efsane .text-primary { color: #16a085 !important; }
